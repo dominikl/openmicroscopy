@@ -900,6 +900,24 @@ public interface TreeViewer
      */
     void download(File folder, boolean override, List<DataObject> selection);
 
+    /**
+     * Downloads the currently selected files to the specified folder.
+     * 
+     * @param folder
+     *            The folder where to download the files.
+     * @param override
+     *            Flag indicating to override the existing file if it exists,
+     *            <code>false</code> otherwise.
+     * @param keepOriginalPaths
+     *            Pass <code>false</code> to just use the image file names,
+     *            <code>true</code> (default) to restore original file paths
+     * @param selection
+     *            The objects to download (can be <code>null</code> in which
+     *            case the current TreeViewer selection will be used)
+     */
+    void download(File folder, boolean override, boolean keepOriginalPaths,
+            List<DataObject> selection);
+    
 	/**
 	 * Sets the collection of archived files.
 	 * 
