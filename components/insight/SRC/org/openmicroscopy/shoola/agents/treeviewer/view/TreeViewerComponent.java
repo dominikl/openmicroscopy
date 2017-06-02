@@ -3620,10 +3620,19 @@ class TreeViewerComponent
 	}
 
 	/**
+     * Implemented as specified by the {@link TreeViewer} interface.
+     * @see TreeViewer#download(File, boolean, List)
+     */
+    public void download(File folder, boolean override, List<DataObject> selection)
+    {
+        download(folder, override, true, selection);
+    }
+    
+	/**
 	 * Implemented as specified by the {@link TreeViewer} interface.
-	 * @see TreeViewer#download(File, boolean, List)
+	 * @see TreeViewer#download(File, boolean, boolean List)
 	 */
-	public void download(File folder, boolean override, List<DataObject> selection)
+	public void download(File folder, boolean override, boolean keepOriginalPaths, List<DataObject> selection)
 	{
         if (model.getState() == DISCARDED)
             return;
@@ -3690,7 +3699,7 @@ class TreeViewerComponent
                     folder, archived, icon);
             p.setOverride(override);
             p.setZip(false);
-            p.setKeepOriginalPaths(true);
+            p.setKeepOriginalPaths(keepOriginalPaths);
             un.notifyActivity(ctx, p);
 	    }
 	}
