@@ -1360,6 +1360,7 @@ public class AdminImpl extends AbstractLevel2Service implements LocalAdmin,
 
         assertNoPrivilegeElevation(user, targetUserPrivilegesBefore);
 
+        getEventContext();  // refresh
     }
 
     // ~ Security context
