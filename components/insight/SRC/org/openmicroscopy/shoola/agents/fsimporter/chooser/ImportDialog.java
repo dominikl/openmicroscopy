@@ -178,6 +178,11 @@ public class ImportDialog extends ClosableTabbedPaneComponent
 	private static final String TOOLTIP_IMPORT =
 			"Import the selected files or directories";
 	
+    private static final String TEXT_DETAILS = "Detailed output";
+
+    private static final String TOOLTIP_DETAILS =
+            "Show detailed import process (not recommended for large imports (>100 files)";
+    
 	/** Text for metadata pane */
 	private static final String TEXT_METADATA_DEFAULTS = "Metadata Defaults";
 
@@ -274,6 +279,8 @@ public class ImportDialog extends ClosableTabbedPaneComponent
 
 	/** Button to import the files. */
 	private JButton importButton;
+	
+	private JCheckBox detailsButton;
 
 	/** Button to refresh the file chooser. */
 	private JButton refreshFilesButton;
@@ -769,6 +776,10 @@ public class ImportDialog extends ClosableTabbedPaneComponent
 		importButton.addActionListener(this);
 		importButton.setEnabled(false);
 
+		detailsButton = new JCheckBox(TEXT_DETAILS);
+		detailsButton.setToolTipText(TOOLTIP_DETAILS);
+		detailsButton.setSelected(false);
+		
 		pixelsSize = new ArrayList<NumericalTextField>();
 		NumericalTextField field;
 		for (int i = 0; i < 3; i++) {
@@ -825,6 +836,8 @@ public class ImportDialog extends ClosableTabbedPaneComponent
 	 */
 	private JPanel buildToolBarRight() {
 		JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		bar.add(detailsButton);
+		bar.add(Box.createHorizontalStrut(5));
 		bar.add(cancelImportButton);
 		bar.add(Box.createHorizontalStrut(5));
 		bar.add(importButton);
@@ -1124,11 +1137,14 @@ public class ImportDialog extends ClosableTabbedPaneComponent
 		}
 
 		object.setScanningDepth(ImporterAgent.getScanningDepth());
-		Boolean loadThumbnails = (Boolean) ImporterAgent.getRegistry()
-				.lookup(LOAD_THUMBNAIL);
-		if (loadThumbnails != null)
-			object.setLoadThumbnail(loadThumbnails.booleanValue());
-		
+
+        Boolean loadThumbnails = (Boolean) ImporterAgent.getRegistry().lookup(
+                LOAD_THUMBNAIL);
+        if (loadThumbnails != null)
+            object.setLoadThumbnail(loadThumbnails.booleanValue());
+
+        object.setShowDetails(detailsButton.isSelected());
+        
 		// if slow connection
 		if (!isFastConnection())
 			object.setLoadThumbnail(false);

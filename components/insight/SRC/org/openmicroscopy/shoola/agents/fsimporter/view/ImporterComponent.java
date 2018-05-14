@@ -390,6 +390,7 @@ class ImporterComponent
 		}
 		view.showRefreshMessage(chooser.isRefreshLocation());
 		if (data.hasNewTags()) model.setTags(null);
+		
 		ImporterUIElement element = view.addImporterElement(data);
 		//if (model.getState() == IMPORTING) return;
 		//Can I start the upload

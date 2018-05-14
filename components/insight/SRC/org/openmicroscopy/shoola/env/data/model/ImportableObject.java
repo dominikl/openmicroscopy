@@ -197,6 +197,8 @@ public class ImportableObject
 	/** Flag indicating to load the thumbnails. */ 
 	private boolean loadThumbnail;
 	
+	private boolean showDetails;
+	
 	/** The nodes of reference. */
 	private List<Object> refNodes;
 	
@@ -284,7 +286,19 @@ public class ImportableObject
 	 */
 	public boolean isLoadThumbnail() { return loadThumbnail; }
 	
-	/**
+	
+	public boolean isShowDetails() {
+        return showDetails;
+    }
+
+    public void setShowDetails(boolean showDetails) {
+        this.showDetails = showDetails;
+        if (!showDetails)
+            this.loadThumbnail = false;
+    }
+
+
+    /**
 	 * Sets the type to use when creating a folder as container.
 	 * 
 	 * @param type The type to use.
