@@ -1077,7 +1077,6 @@ class OmeroImageServiceImpl
                 ImportException e = new ImportException(
                         ImportException.FILE_NOT_VALID_TEXT);
                 status.setCallback(e);
-                status.setText(ImportException.FILE_NOT_VALID_TEXT);
                 return e;
 			}
 			hcsFile = isHCS(ic.getContainers());
@@ -1173,7 +1172,6 @@ class OmeroImageServiceImpl
                     ImportException e = new ImportException(
                             ImportException.FILE_NOT_VALID_TEXT);
                     status.setCallback(e);
-                    status.setText(ImportException.FILE_NOT_VALID_TEXT);
                     return e;
 				}
 				else if (size == 1) {

@@ -24,6 +24,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,8 @@ import org.apache.commons.io.FileUtils;
 import org.openmicroscopy.shoola.env.data.ImportException;
 import org.openmicroscopy.shoola.env.data.model.FileObject;
 
-public class StatusLabel implements IObserver {
+public class StatusTracker implements IObserver {
+    
     /**
      * Bound property indicating that the original container has been reset.
      * */
@@ -86,33 +88,36 @@ public class StatusLabel implements IObserver {
     /** Bound property indicating that the scanning has started. */
     public static final String PROCESSING_ERROR_PROPERTY = "processingError";
 
-    public static final String FILE_UPLOAD_BYTES_PROPERTY = "uploadBytes";
-    
-    public static final String FILESET_UPLOAD_END_PROPERTY = "uploadEnd";
-    
-    
-    public static final String METADATA_IMPORTED_PROPERTY = "metadataImportStarted";
-    public static final String PIXELDATA_PROCESSED_PROPERTY = "pixeldataProcessed";
-    public static final String THUMBNAILS_GENERATED_PROPERTY = "thumbsGenerated";
-    public static final String METADATA_PROCESSED_PROPERTY = "metadataProcessed";
-    
-    
     /** The default text of the component. */
     public static final String DEFAULT_TEXT = "Pending...";
 
-    /** Text to indicate that the import is cancelled. */
-    private static final String CANCEL_TEXT = "Cancelled";
-
-    /** Text to indicate that no files to import. */
-    private static final String NO_FILES_TEXT = "No Files to Import.";
-
-    /** The width of the upload bar. */
-    private static final int WIDTH = 200;
-
-    /** The maximum number of value for upload. */
-    private static final int MAX = 100;
-
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+    /**
+     * The number of processing sets. 1. Importing Metadata 2. Processing Pixels
+     * 3. Generating Thumbnails 4. Processing Metadata 5. Generating Objects
+     */
+    /** Map hosting the description of each step. */
+    private static final Map<Integer, String> STEPS;
+
+    /** Map hosting the description of the failure at a each step. */
+    private static final Map<Integer, String> STEP_FAILURES;
+
+    static {
+        STEPS = new HashMap<Integer, String>();
+        STEPS.put(1, "Importing Metadata");
+        STEPS.put(2, "Reading Pixels");
+        STEPS.put(3, "Generating Thumbnails");
+        STEPS.put(4, "Reading Metadata");
+        STEPS.put(5, "Generating Objects");
+        STEPS.put(6, "Complete");
+        STEP_FAILURES = new HashMap<Integer, String>();
+        STEP_FAILURES.put(1, "Failed to Import Metadata");
+        STEP_FAILURES.put(2, "Failed to Read Pixels");
+        STEP_FAILURES.put(3, "Failed to Generate Thumbnails");
+        STEP_FAILURES.put(4, "Failed to Read Metadata");
+        STEP_FAILURES.put(5, "Failed to Generate Objects");
+    }
 
     /** The container. */
     private ImportContainer ic;
@@ -221,7 +226,6 @@ public class StatusLabel implements IObserver {
         if (isMarkedAsCancel())
             return;
         cancellable = false;
-        firePropertyChange(PROCESSING_ERROR_PROPERTY, null, text);
     }
 
     /**
@@ -230,7 +234,7 @@ public class StatusLabel implements IObserver {
      * @param sourceFile
      *            The file associated to that label.
      */
-    public StatusLabel(FileObject sourceFile) {
+    public StatusTracker(FileObject sourceFile) {
         this.sourceFile = sourceFile;
         initialize();
     }
@@ -392,9 +396,7 @@ public class StatusLabel implements IObserver {
      * @param files
      *            The file to handle.
      */
-    public void setFiles(Map<File, StatusLabel> files) {
-        if (isMarkedAsCancel())
-            return;
+    public void setFiles(Map<File, StatusTracker> files) {
         firePropertyChange(FILES_SET_PROPERTY, null, files);
     }
 
@@ -561,8 +563,6 @@ public class StatusLabel implements IObserver {
             exception = new ImportException(e.exception);
             handleProcessingError("", true);
         } else if (event instanceof ImportEvent.FILE_UPLOAD_BYTES) {
-            ImportEvent.FILE_UPLOAD_BYTES e = (ImportEvent.FILE_UPLOAD_BYTES) event;
-            firePropertyChange(FILE_UPLOAD_BYTES_PROPERTY, null, e);
         } else if (event instanceof ImportEvent.FILE_UPLOAD_COMPLETE) {
             ImportEvent.FILE_UPLOAD_COMPLETE e = (ImportEvent.FILE_UPLOAD_COMPLETE) event;
             totalUploadedSize += e.uploadedBytes;
@@ -571,19 +571,14 @@ public class StatusLabel implements IObserver {
             if (exception == null) {
                 step = 1;
             }
-            firePropertyChange(FILESET_UPLOAD_END_PROPERTY, null, "nothing");
         } else if (event instanceof ImportEvent.METADATA_IMPORTED) {
             step = 2;
-            firePropertyChange(METADATA_IMPORTED_PROPERTY, null, "nothing");
         } else if (event instanceof ImportEvent.PIXELDATA_PROCESSED) {
             step = 3;
-            firePropertyChange(PIXELDATA_PROCESSED_PROPERTY, null, "nothing");
         } else if (event instanceof ImportEvent.THUMBNAILS_GENERATED) {
             step = 4;
-            firePropertyChange(THUMBNAILS_GENERATED_PROPERTY, null, "nothing");
         } else if (event instanceof ImportEvent.METADATA_PROCESSED) {
             step = 5;
-            firePropertyChange(METADATA_PROCESSED_PROPERTY, null, "nothing");
         } else if (event instanceof ImportEvent.FILESET_UPLOAD_START) {
             uploadStarted = true;
             firePropertyChange(FILE_IMPORT_STARTED_PROPERTY, null, this);
@@ -598,36 +593,6 @@ public class StatusLabel implements IObserver {
             ic = e.container;
 
         }
-    }
-    
-
-    public String getUnits() {
-        return units;
-    }
-
-    public long getSizeUpload() {
-        return sizeUpload;
-    }
-
-    public int getStep() {
-        return step;
-    }
-
-    public boolean isUploadStarted() {
-        return uploadStarted;
-    }
-    
-    public void setMarkedAsCancel(boolean markedAsCancel) {
-        this.markedAsCancel = markedAsCancel;
-    }
-    
-    public void setMarkedAsDuplicate(boolean markedAsDuplicate) {
-        this.markedAsDuplicate = markedAsDuplicate;
-    }
-    
-    
-    public long getTotalUploadedSize() {
-        return totalUploadedSize;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

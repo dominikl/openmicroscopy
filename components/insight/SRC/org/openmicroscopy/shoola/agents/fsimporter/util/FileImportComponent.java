@@ -195,6 +195,8 @@ public class FileImportComponent
 	/** Indicates the status of the on-going import. */
 	private StatusLabel statusLabel;
 	
+	private StatusLabelView statusLabelView;
+	
 	/** The component displaying the name of the file. */
 	private JLabel fileNameLabel;
 	
@@ -492,7 +494,7 @@ public class FileImportComponent
 			else if (status == ImportException.MISSING_LIBRARY)
 			    resultIndex = ImportStatus.FAILURE_LIBRARY;
 			else resultIndex = ImportStatus.FAILURE;
-			statusLabel.setText("");
+			statusLabelView.setText("");
 		} else if (result instanceof CmdCallback) {
 			callback = (CmdCallback) result;
 		} else {
@@ -674,6 +676,7 @@ public class FileImportComponent
 		namePane.add(Box.createHorizontalStrut(10));
 		resultLabel = new JLabel();
 		statusLabel = new StatusLabel(importable.getFile());
+		statusLabelView = new StatusLabelView(statusLabel);
 		statusLabel.addPropertyChangeListener(this);
 		image = null;
 		refButton = cancelButton;
@@ -695,7 +698,7 @@ public class FileImportComponent
 					getFile().getName()));
 		add(UIUtilities.buildComponentPanel(namePane, false),
 				"0, 0, l, c");
-		add(statusLabel, "1, 0, l, c");
+		add(statusLabelView, "1, 0, l, c");
 		
 		/*
 		add(busyLabel, "2, 0, l, c");
@@ -1030,7 +1033,7 @@ public class FileImportComponent
 		} else if (image instanceof ImportException) {
 			if (getFile().isDirectory()) {
 				this.image = null;
-				statusLabel.setText(EMPTY_FOLDER);
+				statusLabelView.setText(EMPTY_FOLDER);
 			} else formatResult();
 		} else if (image instanceof Boolean) {
 			busyLabel.setBusy(false);
@@ -1601,7 +1604,7 @@ public class FileImportComponent
 	 */
 	public void onResultsSaving(String message, boolean busy)
 	{
-	    statusLabel.updatePostProcessing(message, !busy);
+	    statusLabelView.updatePostProcessing(message, !busy);
 	    busyLabel.setVisible(busy);
 	    busyLabel.setBusy(busy);
 	}
