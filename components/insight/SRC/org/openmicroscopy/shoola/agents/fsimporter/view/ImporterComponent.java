@@ -50,7 +50,10 @@ import org.openmicroscopy.shoola.env.data.model.ImportableFile;
 import org.openmicroscopy.shoola.env.data.model.ImportableObject;
 import org.openmicroscopy.shoola.env.data.model.ResultsObject;
 import org.openmicroscopy.shoola.env.data.model.ThumbnailData;
+import org.openmicroscopy.shoola.env.data.util.StatusLabel;
+
 import omero.gateway.SecurityContext;
+
 import org.openmicroscopy.shoola.env.event.EventBus;
 import org.openmicroscopy.shoola.env.ui.UserNotifier;
 import org.openmicroscopy.shoola.util.file.ImportErrorObject;
@@ -123,7 +126,7 @@ class ImporterComponent
 	 * @param startUpload Pass <code>true</code> to indicate to start the 
 	 * upload, <code>false</code> otherwise.
 	 */
-	private void handleCompletion(ImporterUIElement element, Object result,
+	private void handleCompletion(ImporterUIElementBase element, Object result,
 			boolean startUpload)
 	{
 		boolean refreshTree = false;
@@ -179,7 +182,7 @@ class ImporterComponent
 	 * 
 	 * @param element The import view. 
 	 */
-	private void importData(ImporterUIElement element)
+	private void importData(ImporterUIElementBase element)
 	{
 		if (element == null) return;
 		view.setSelectedPane(element, true);
@@ -391,28 +394,35 @@ class ImporterComponent
 		view.showRefreshMessage(chooser.isRefreshLocation());
 		if (data.hasNewTags()) model.setTags(null);
 		
-		ImporterUIElement element = view.addImporterElement(data);
-		//if (model.getState() == IMPORTING) return;
-		//Can I start the upload
-		Collection<ImporterUIElement> list = view.getImportElements();
-		Iterator<ImporterUIElement> i = list.iterator();
-		ImporterUIElement e;
-		boolean canImport = true;
-		while (i.hasNext()) {
-			e = i.next();
-			if (e.hasStarted() && !e.isUploadComplete()) {
-				canImport = false;
-				break;
-			}
-		}
-		if (!canImport) return;
-		importData(element);
-		if (!controller.isMaster()) {
-			EventBus bus = ImporterAgent.getRegistry().getEventBus();
-			ImportStatusEvent event;
-			event = new ImportStatusEvent(hasOnGoingImport(), null, null);
-			bus.post(event);
-		}
+//		if (!data.isShowDetails()) {
+//		    for (ImportableFile f : data.getFiles())
+//		        f.setStatus(new StatusLabel(f.getFile()));
+//		    model.fireImportData(data, 1);
+//		}
+//		else {
+		    ImporterUIElementBase element = view.addImporterElement(data);
+    		//if (model.getState() == IMPORTING) return;
+    		//Can I start the upload
+    		Collection<ImporterUIElementBase> list = view.getImportElements();
+    		Iterator<ImporterUIElementBase> i = list.iterator();
+    		ImporterUIElementBase e;
+    		boolean canImport = true;
+    		while (i.hasNext()) {
+    			e = i.next();
+    			if (e.hasStarted() && !e.isUploadComplete()) {
+    				canImport = false;
+    				break;
+    			}
+    		}
+    		if (!canImport) return;
+    		importData(element);
+    		if (!controller.isMaster()) {
+    			EventBus bus = ImporterAgent.getRegistry().getEventBus();
+    			ImportStatusEvent event;
+    			event = new ImportStatusEvent(hasOnGoingImport(), null, null);
+    			bus.post(event);
+    		}
+//		}
 	}
 	
 	/** 
@@ -422,7 +432,7 @@ class ImporterComponent
 	public void uploadComplete(ImportableFile f, Object result, int index)
 	{
 		if (model.getState() == DISCARDED) return;
-		ImporterUIElement element = view.getUIElement(index);
+		ImporterUIElementBase element = view.getUIElement(index);
 		if (element != null) {
 			Object formattedResult = element.uploadComplete(f, result);
 			handleCompletion(element, formattedResult, true);
@@ -465,7 +475,7 @@ class ImporterComponent
 	public void removeImportElement(Object object)
 	{
 		if (model.getState() == DISCARDED || object == null) return;
-		ImporterUIElement element = view.removeImportElement(object);
+		ImporterUIElementBase element = view.removeImportElement(object);
 		if (element != null) {
 			element.cancelLoading();
 			model.cancel(element.getID());
@@ -586,10 +596,10 @@ class ImporterComponent
 	public boolean hasOnGoingImport()
 	{
 		if (model.getState() != DISCARDED) {
-			Collection<ImporterUIElement> list = view.getImportElements();
+			Collection<ImporterUIElementBase> list = view.getImportElements();
 			if (list == null || list.size() == 0) return false;
-			Iterator<ImporterUIElement> i = list.iterator();
-			ImporterUIElement element;
+			Iterator<ImporterUIElementBase> i = list.iterator();
+			ImporterUIElementBase element;
 			while (i.hasNext()) {
 				element = i.next();
 				if (!element.isDone())
@@ -633,9 +643,9 @@ class ImporterComponent
 		Set nodes = TreeViewerTranslator.transformHierarchy(result);
 		chooser.reset(nodes, type, model.getGroupId(), userID);
 		if (refreshImport) {
-			Collection<ImporterUIElement> l = view.getImportElements();
-			Iterator<ImporterUIElement> i = l.iterator();
-			ImporterUIElement element;
+			Collection<ImporterUIElementBase> l = view.getImportElements();
+			Iterator<ImporterUIElementBase> i = l.iterator();
+			ImporterUIElementBase element;
 			while (i.hasNext()) {
 				element = i.next();
 				if (!element.isDone()) {
@@ -652,12 +662,12 @@ class ImporterComponent
 	public void cancelAllImports()
 	{
 		if (model.getState() != DISCARDED) {
-			Collection<ImporterUIElement> list = view.getImportElements();
-			List<ImporterUIElement> 
-			toImport = new ArrayList<ImporterUIElement>();
+			Collection<ImporterUIElementBase> list = view.getImportElements();
+			List<ImporterUIElementBase> 
+			toImport = new ArrayList<ImporterUIElementBase>();
 			if (CollectionUtils.isEmpty(list)) return;
-			Iterator<ImporterUIElement> i = list.iterator();
-			ImporterUIElement element;
+			Iterator<ImporterUIElementBase> i = list.iterator();
+			ImporterUIElementBase element;
 			while (i.hasNext()) {
 				element = i.next();
 				if (element.hasImportToCancel())
@@ -776,12 +786,12 @@ class ImporterComponent
 			throw new IllegalStateException(
 					"This method cannot be invoked in the DISCARDED state.");
 		}
-		Collection<ImporterUIElement> list = view.getImportElements();
+		Collection<ImporterUIElementBase> list = view.getImportElements();
 		if (CollectionUtils.isEmpty(list)) {
 			return;
 		}
-		Iterator<ImporterUIElement> i = list.iterator();
-		ImporterUIElement element;
+		Iterator<ImporterUIElementBase> i = list.iterator();
+		ImporterUIElementBase element;
 		while (i.hasNext()) {
 			element = i.next();
 			if (element.getID() == index) {
@@ -821,10 +831,10 @@ class ImporterComponent
 	public boolean hasOnGoingUpload()
 	{
 		if (model.getState() != DISCARDED) {
-			Collection<ImporterUIElement> list = view.getImportElements();
+			Collection<ImporterUIElementBase> list = view.getImportElements();
 			if (list == null || list.size() == 0) return false;
-			Iterator<ImporterUIElement> i = list.iterator();
-			ImporterUIElement element;
+			Iterator<ImporterUIElementBase> i = list.iterator();
+			ImporterUIElementBase element;
 			while (i.hasNext()) {
 				element = i.next();
 				if (!element.isUploadComplete())
@@ -841,7 +851,7 @@ class ImporterComponent
 	public void onImportComplete(FileImportComponent component)
 	{
 		if (component == null || model.getState() == DISCARDED) return;
-		ImporterUIElement element = view.getUIElement(component.getIndex());
+		ImporterUIElementBase element = view.getUIElement(component.getIndex());
 		if (element == null) return;
 		Object result = component.getImportResult();
 		if (result instanceof Exception) {
@@ -893,7 +903,7 @@ class ImporterComponent
 	{
 		if (model.getState() == DISCARDED) return;
 		if (component == null || model.getState() == DISCARDED) return;
-		ImporterUIElement element = view.getUIElement(component.getIndex());
+		ImporterUIElementBase element = view.getUIElement(component.getIndex());
 		if (element == null) return;
 		Object result = component.getImportResult();
 		Object formattedResult = element.uploadComplete(component, result);
@@ -913,7 +923,7 @@ class ImporterComponent
 	{
 		if (component == null || model.getState() == DISCARDED) return;
 		FileImportComponent c = (FileImportComponent) component;
-		ImporterUIElement element = view.getUIElement(c.getIndex());
+		ImporterUIElementBase element = view.getUIElement(c.getIndex());
 		if (element == null) return;
 		c.setStatus(result);
 	}

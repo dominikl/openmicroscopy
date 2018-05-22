@@ -96,7 +96,7 @@ import omero.gateway.model.ScreenData;
  * @since 3.0-Beta4
  */
 class ImporterUIElement 
-	extends ClosableTabbedPaneComponent
+	extends ImporterUIElementBase
 {
 	
 	/** Description of the component. */
@@ -111,9 +111,6 @@ class ImporterUIElement
 	
 	/** The columns for the layout of the {@link #entries}. */
 	private static final double[] COLUMNS = {TableLayout.FILL};
-	
-	/** The default size of the icon. */
-	private static final Dimension ICON_SIZE = new Dimension(16, 16);
 	
 	/** Icon used when the import is completed successfully. */
 	private static final Icon IMPORT_SUCCESS;
@@ -202,9 +199,6 @@ class ImporterUIElement
 	
 	/** The existing containers. */
 	private List<DataObject> existingContainers;
-
-	/** The busy label. */
-	private JXBusyLabel busyLabel;
 	
 	/**The icon used to indicate an on-going import.*/
 	private RotationIcon rotationIcon;
@@ -334,7 +328,6 @@ class ImporterUIElement
 			}
 		});
 		sizeImport = 0;
-		busyLabel = new JXBusyLabel(ICON_SIZE);
 		numberOfImportLabel = UIUtilities.createComponent(null);
 		foldersName = new LinkedHashMap<JLabel, Object>();
 		countUploadFailure = 0;
@@ -660,30 +653,12 @@ class ImporterUIElement
 			ImporterUI view, int id, int index, String name,
 			ImportableObject object)
 	{
-		super(index, name, DESCRIPTION);
-		if (object == null) 
-			throw new IllegalArgumentException("No object specified.");
-		if (controller == null)
-			throw new IllegalArgumentException("No Control.");
-		if (model == null)
-			throw new IllegalArgumentException("No Model.");
-		if (view == null)
-			throw new IllegalArgumentException("No View.");
-		this.controller = controller;
-		this.model = model;
-		this.view = view;
-		this.id = id;
-		this.object = object;
+		super(controller, model,
+	            view, id, index, name,
+	            object);
 		initialize();
 		buildGUI();
 	}
-
-	/**
-	 * Returns the identifier of the component.
-	 * 
-	 * @return See above.
-	 */
-	int getID() { return id; }
 	
 	/**
 	 * Returns the formatted result.
@@ -859,28 +834,6 @@ class ImporterUIElement
 	 */
 	boolean isLastImport() { return countImported == (totalToImport-1); }
 	
-	/** 
-	 * Indicates that the import has started. 
-	 * 
-	 * @param component The component of reference of the rotation icon.
-	 */
-	Icon startImport(JComponent component)
-	{
-		uploadStarted = true;
-		setClosable(false);
-		busyLabel.setBusy(true);
-		repaint();
-		return new RotationIcon(busyLabel.getIcon(), component, true);
-	}
-	
-	/**
-	 * Returns <code>true</code> if the import has started, <code>false</code>
-	 * otherwise.
-	 * 
-	 * @return See above.
-	 */
-	boolean hasStarted() { return uploadStarted; }
-	
 	/**
 	 * Manually sets the uploadStarted flag
 	 * @param uploadStarted
@@ -950,13 +903,6 @@ class ImporterUIElement
 		}
 		return list;
 	}
-	
-	/**
-	 * Returns the object to import.
-	 * 
-	 * @return See above.
-	 */
-	ImportableObject getData() { return object; }
 	
 	/**
 	 * Returns the existing containers.
@@ -1148,14 +1094,7 @@ class ImporterUIElement
 			else if (failure > 0) return IMPORT_PARTIAL;
 			return IMPORT_SUCCESS;
 		}
-		return busyLabel.getIcon();
-	}
-	
-	/** Invokes when the import is finished. */
-	void onImportEnded()
-	{ 
-		busyLabel.setBusy(false);
-		setClosable(true);
+		return super.getImportIcon();
 	}
 
 	/**

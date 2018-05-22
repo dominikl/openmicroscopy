@@ -143,7 +143,7 @@ class ImporterUI extends TopWindow
 	private int uiElementID;
 	
 	/** Keeps track of the imports. */
-	private Map<Integer, ImporterUIElement> uiElements;
+	private Map<Integer, ImporterUIElementBase> uiElements;
 	
 	/** The controls bar. */
 	private JComponent controlsBar;
@@ -305,7 +305,7 @@ class ImporterUI extends TopWindow
 		controlsBar = buildControls();
 		controlsBar.setVisible(false);
 		uiElementID = 0;
-		uiElements = new LinkedHashMap<Integer, ImporterUIElement>();
+		uiElements = new LinkedHashMap<Integer, ImporterUIElementBase>();
 		tabs = new ClosableTabbedPane(JTabbedPane.TOP, 
 				JTabbedPane.WRAP_TAB_LAYOUT);
 		tabs.setAlignmentX(LEFT_ALIGNMENT);
@@ -469,13 +469,18 @@ class ImporterUI extends TopWindow
 	 * 
 	 * @param object The component to add.
 	 */
-	ImporterUIElement addImporterElement(ImportableObject object)
+	ImporterUIElementBase addImporterElement(ImportableObject object)
 	{
 		if (object == null) return null;
 		int n = tabs.getComponentCount();
 		String title = "Import #"+total;
-		ImporterUIElement element = new ImporterUIElement(controller, model,
-				this, uiElementID, n, title, object);
+		ImporterUIElementBase element;
+        if (object.isShowDetails())
+            element = new ImporterUIElement(controller, model, this,
+                    uiElementID, n, title, object);
+        else
+            element = new LightImporterUIElement(controller, model, this,
+                    uiElementID, n, title, object);
 		tabs.insertTab(title, element.getImportIcon(), element, "", total);
 		total++;
 		uiElements.put(uiElementID, element);
@@ -503,7 +508,7 @@ class ImporterUI extends TopWindow
 	 * 
 	 * @param element The element to handle.
 	 */
-	void onImportEnded(ImporterUIElement element)
+	void onImportEnded(ImporterUIElementBase element)
 	{
 		if (element == null) return;
 		element.onImportEnded();
@@ -530,7 +535,7 @@ class ImporterUI extends TopWindow
 	 * @param startImport Pass <code>true</code> to start the import, 
 	 * 					  <code>false</code> otherwise.
 	 */
-	void setSelectedPane(ImporterUIElement element, boolean startImport)
+	void setSelectedPane(ImporterUIElementBase element, boolean startImport)
 	{
 		int n = tabs.getComponentCount();
 		if (n == 0 || element == null) return;
@@ -567,7 +572,7 @@ class ImporterUI extends TopWindow
 	 * @param index The identifier of the component
 	 * @return See above.
 	 */
-	ImporterUIElement getUIElement(int index)
+	ImporterUIElementBase getUIElement(int index)
 	{
 		return uiElements.get(index);
 	}
@@ -577,11 +582,11 @@ class ImporterUI extends TopWindow
 	 * 
 	 * @return See above.
 	 */
-	ImporterUIElement getElementToStartImportFor()
+	ImporterUIElementBase getElementToStartImportFor()
 	{
 		if (uiElements.size() == 0) return null;
-		Iterator<ImporterUIElement> i = uiElements.values().iterator();
-		ImporterUIElement element;
+		Iterator<ImporterUIElementBase> i = uiElements.values().iterator();
+		ImporterUIElementBase element;
 		while (i.hasNext()) {
 			element = i.next();
 			if (!element.hasStarted())
@@ -596,11 +601,11 @@ class ImporterUI extends TopWindow
 	 * @param object The object to remove.
 	 * @return See above.
 	 */
-	ImporterUIElement removeImportElement(Object object)
+	ImporterUIElementBase removeImportElement(Object object)
 	{
-		Iterator<ImporterUIElement> i = uiElements.values().iterator();
-		ImporterUIElement element;
-		ImporterUIElement found = null;
+		Iterator<ImporterUIElementBase> i = uiElements.values().iterator();
+		ImporterUIElementBase element;
+		ImporterUIElementBase found = null;
 		while (i.hasNext()) {
 			element = i.next();
 			if (element == object) {
@@ -617,7 +622,7 @@ class ImporterUI extends TopWindow
 	 * 
 	 * @return See above.
 	 */
-	Collection<ImporterUIElement> getImportElements()
+	Collection<ImporterUIElementBase> getImportElements()
 	{
 		return uiElements.values();
 	}
@@ -630,9 +635,9 @@ class ImporterUI extends TopWindow
 	 */
 	boolean hasOnGoingImportFor(SecurityContext ctx)
 	{
-	    Collection<ImporterUIElement> values = uiElements.values();
-	    Iterator<ImporterUIElement> i = values.iterator();
-	    ImporterUIElement elt;
+	    Collection<ImporterUIElementBase> values = uiElements.values();
+	    Iterator<ImporterUIElementBase> i = values.iterator();
+	    ImporterUIElementBase elt;
 	    ImportableObject data;
 	    List<ImportableFile> files;
 	    ImportableFile f;

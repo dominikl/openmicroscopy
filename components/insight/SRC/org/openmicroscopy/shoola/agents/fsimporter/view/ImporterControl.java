@@ -355,7 +355,7 @@ class ImporterControl
         if (!cancelAction.isEnabled()) {
             return;
         }
-        for (final ImporterUIElement importerUIElement : view.getImportElements()) {
+        for (final ImporterUIElementBase importerUIElement : view.getImportElements()) {
         	if (importerUIElement.hasImportToCancel()) {
                 return;
             }
