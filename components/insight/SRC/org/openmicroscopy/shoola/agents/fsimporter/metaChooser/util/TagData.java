@@ -419,9 +419,10 @@ public class TagData
 					valChanged=true;
 					valSaved=false;
 
-					if(inputField.getBorder().equals(errorBorder)){
-						setTagInfo("");
-					}
+					// comment out because of NPE
+//					if(inputField.getBorder().equals(errorBorder)){
+//						setTagInfo("");
+//					}
 				}
 			}
 		};
