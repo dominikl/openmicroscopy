@@ -37,13 +37,8 @@ into a dataset -->
 <entry name="/options/FolderAsDataset" type="boolean">true</entry>
 <!-- if set to true, the debug tab will be displayed. -->
 <entry name="/options/Debug" type="boolean">false</entry>
-<<<<<<< HEAD
 <!-- limit the number of files to show detailed import information for -->
 <entry name="/options/DetailedImportFileLimit" type="integer">100</entry>
-=======
-<!-- limit the number of files to import at once -->
-<entry name="/options/ImportFileLimit" type="integer">2000</entry>
 <entry name="/services/ADMIN/microscope">Universal</entry>
->>>>>>> dev_CellNanOs.labb
 </options>
 </agent>
