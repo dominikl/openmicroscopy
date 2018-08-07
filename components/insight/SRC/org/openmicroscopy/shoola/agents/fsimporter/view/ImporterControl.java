@@ -1,4 +1,6 @@
 /*
+ * org.openmicroscopy.shoola.agents.fsimporter.view.ImporterControl 
+ *
  *------------------------------------------------------------------------------
  *  Copyright (C) 2006-2018 University of Dundee. All rights reserved.
  *
@@ -27,6 +29,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,12 +60,14 @@ import org.openmicroscopy.shoola.agents.fsimporter.actions.PersonalManagementAct
 import org.openmicroscopy.shoola.agents.fsimporter.actions.RetryImportAction;
 import org.openmicroscopy.shoola.agents.fsimporter.actions.SubmitFilesAction;
 import org.openmicroscopy.shoola.agents.fsimporter.chooser.ImportDialog;
+import org.openmicroscopy.shoola.agents.fsimporter.metaChooser.util.MapAnnotationObject;
 import org.openmicroscopy.shoola.agents.fsimporter.util.FileImportComponent;
 import org.openmicroscopy.shoola.agents.fsimporter.util.FileImportComponentI;
 import org.openmicroscopy.shoola.agents.fsimporter.util.ObjectToCreate;
 import org.openmicroscopy.shoola.agents.util.ViewerSorter;
 import org.openmicroscopy.shoola.agents.util.ui.JComboBoxImageObject;
 import org.openmicroscopy.shoola.env.LookupNames;
+import org.openmicroscopy.shoola.env.data.model.ImportableFile;
 import org.openmicroscopy.shoola.env.data.model.ImportableObject;
 import org.openmicroscopy.shoola.env.data.util.Status;
 import org.openmicroscopy.shoola.env.ui.UserNotifier;
@@ -388,6 +393,9 @@ class ImporterControl
          */
         private void handlePropertyChangedEvent(PropertyChangeEvent evt) {
             String name = evt.getPropertyName();
+            if(ImportDialog.STARTIMPORT_PROPERTY.equals(name)){ 
+            	view.startImport();
+            }
             if (ImportDialog.IMPORT_PROPERTY.equals(name)) {
                 actionsMap.get(CANCEL_BUTTON).setEnabled(true);
                 model.importData((ImportableObject) evt.getNewValue());
@@ -419,9 +427,18 @@ class ImporterControl
                 checkDisableCancelAllButtons();
             } else if (Status.IMPORT_DONE_PROPERTY.equals(name)) {
                     model.onImportComplete((FileImportComponentI) evt.getNewValue());
+                    view.deleteMapAnnotations();
             } else if (Status.UPLOAD_DONE_PROPERTY.equals(name)) {
                     model.onUploadComplete((FileImportComponentI) evt.getNewValue());
-            }
+            } else if(ImportDialog.REFRESH_FILE_LIST.equals(name)){
+    			view.refreshMetaFileView((List<ImportableFile>) evt.getNewValue());
+    		} else if(ImportDialog.SHOW_METADATA_DIALOG.equals(name)){
+    			view.showMetaDataDialog();
+    		}else if(ImportDialog.ADD_MAP_ANNOTATION.equals(name)){
+    			view.setMapAnnotation((MapAnnotationObject) evt.getNewValue());
+    		}else if(ImportDialog.REFRESH_TITLE.equals(name)) {
+    			view.setNewTitle((String) evt.getNewValue());
+    		}
         }
 
 	/** 

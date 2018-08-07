@@ -331,6 +331,10 @@ public class LookupNames
     public static final String PROCESSING_URL = 
             "/services/DEBUGGER/hostnameProcessing";
 
+    
+    /** Field to access the name of microscope for load default hardware information. */
+    public static final String MICROSCOPE_WORKSTATION="/services/ADMIN/microscope";
+    
     /** Field to access the application number to submit bug. */
     public static final String APPLICATION_NAME_BUG =
             "/services/DEBUGGER/applicationNameBug";

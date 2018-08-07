@@ -141,6 +141,9 @@ class GeneralPaneUI extends JPanel
     /** The component hosting the annotation component. */
     private AnnotationTaskPane                  commentTaskPane;
 	
+    /** The component hosting the annotation component. */
+    private AnnotationTaskPane                  metadataUOSTaskPane;
+	
 	/** Collection of annotations UI components. */
 	private List<AnnotationUI>			components;
 	
@@ -256,6 +259,8 @@ class GeneralPaneUI extends JPanel
 	    
 	    mapTaskPane = new AnnotationTaskPane(AnnotationType.MAP, view, model, controller);
 	    
+	    metadataUOSTaskPane = new AnnotationTaskPane(AnnotationType.METADATA_UOS,view,model,controller);
+	    
 	    attachmentTaskPane = new AnnotationTaskPane(AnnotationType.ATTACHMENTS, view, model, controller);
 	    
 	    otherTaskPane = new AnnotationTaskPane(AnnotationType.OTHER, view, model, controller);
@@ -313,6 +318,7 @@ class GeneralPaneUI extends JPanel
         tagsTaskPane.filter(annotationsFilter);
         roiTaskPane.filter(annotationsFilter);
         mapTaskPane.filter(annotationsFilter);
+        metadataUOSTaskPane.filter(annotationsFilter);
         attachmentTaskPane.filter(annotationsFilter);
         ratingTaskPane.filter(annotationsFilter);
         otherTaskPane.filter(annotationsFilter);
@@ -363,6 +369,9 @@ class GeneralPaneUI extends JPanel
         //c.gridy++;
         
         add(mapTaskPane, c);
+        c.gridy++;
+        
+        add(metadataUOSTaskPane,c);
         c.gridy++;
         
         add(attachmentTaskPane, c);
@@ -473,6 +482,7 @@ class GeneralPaneUI extends JPanel
                 tagsTaskPane.refreshUI();
                 roiTaskPane.refreshUI();
                 mapTaskPane.refreshUI();
+                metadataUOSTaskPane.refreshUI();
                 attachmentTaskPane.refreshUI();
                 ratingTaskPane.refreshUI();
                 commentTaskPane.refreshUI();
@@ -512,7 +522,10 @@ class GeneralPaneUI extends JPanel
             namePane.setVisible(!multi);
             idLabel.setVisible(!multi);
             propertiesTaskPane.setVisible(!multi);
- 
+            if (visible) {
+                mapTaskPane.setVisible(!multi);
+                metadataUOSTaskPane.setVisible(!multi);
+            }
             revalidate();
         }
 	
@@ -609,6 +622,7 @@ class GeneralPaneUI extends JPanel
     	tagsTaskPane.clearDisplay();
         roiTaskPane.clearDisplay();
         mapTaskPane.clearDisplay();
+        metadataUOSTaskPane.clearDisplay();
         attachmentTaskPane.clearDisplay();
         otherTaskPane.clearDisplay();
         ratingTaskPane.clearDisplay();
@@ -876,6 +890,7 @@ class GeneralPaneUI extends JPanel
 	    tagsTaskPane.onRelatedNodesSet();
 	    roiTaskPane.onRelatedNodesSet();
 	    mapTaskPane.onRelatedNodesSet();
+	    metadataUOSTaskPane.onRelatedNodesSet();
 	    attachmentTaskPane.onRelatedNodesSet();
 	    otherTaskPane.onRelatedNodesSet();
 	    ratingTaskPane.onRelatedNodesSet();

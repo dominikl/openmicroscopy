@@ -5885,7 +5885,7 @@ class OMEROGateway
              config.targetId.set(container.getId().getValue());
              ic.setTarget(container);
         }
-
+        
         ic.setUserPixels(object.getPixelsSize());
         OMEROMetadataStoreClient omsc = null;
         OMEROWrapper reader = null;
@@ -6185,7 +6185,7 @@ class OMEROGateway
 		}
 		return Collections.EMPTY_LIST;
 	}
-
+	
 	/**
 	 * Loads the <code>FileAnnotationData</code>s for the passed image.
 	 *

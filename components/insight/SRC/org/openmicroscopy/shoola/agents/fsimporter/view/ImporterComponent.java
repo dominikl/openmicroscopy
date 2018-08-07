@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JFrame;
@@ -35,6 +36,8 @@ import org.openmicroscopy.shoola.agents.events.importer.ImportStatusEvent;
 import org.openmicroscopy.shoola.agents.fsimporter.ImporterAgent;
 import org.openmicroscopy.shoola.agents.fsimporter.chooser.ImportDialog;
 import org.openmicroscopy.shoola.agents.fsimporter.chooser.ImportLocationSettings;
+import org.openmicroscopy.shoola.agents.fsimporter.metaChooser.MetaDataDialog;
+import org.openmicroscopy.shoola.agents.fsimporter.metaChooser.util.ImportUserData;
 import org.openmicroscopy.shoola.agents.fsimporter.util.FileImportComponent;
 import org.openmicroscopy.shoola.agents.fsimporter.util.FileImportComponentI;
 import org.openmicroscopy.shoola.agents.fsimporter.util.ObjectToCreate;
@@ -42,6 +45,7 @@ import org.openmicroscopy.shoola.agents.treeviewer.view.TreeViewer;
 import org.openmicroscopy.shoola.agents.util.ViewerSorter;
 import org.openmicroscopy.shoola.agents.util.browser.TreeImageDisplay;
 import org.openmicroscopy.shoola.agents.util.browser.TreeViewerTranslator;
+import org.openmicroscopy.shoola.env.LookupNames;
 import org.openmicroscopy.shoola.env.config.Registry;
 import org.openmicroscopy.shoola.env.data.events.ExitApplication;
 import org.openmicroscopy.shoola.env.data.events.LogOff;
@@ -66,6 +70,8 @@ import omero.gateway.model.PixelsData;
 import omero.gateway.model.PlateData;
 import omero.gateway.model.ProjectData;
 import omero.gateway.model.ScreenData;
+
+
 
 /** 
  * Implements the {@link Importer} interface to provide the functionality
@@ -112,9 +118,17 @@ class ImporterComponent
 	
 	/** Reference to the chooser used to select the files to import. */
 	private ImportDialog	chooser;
+	
+	/** Reference to the metadata chooser used to specificate metadata for the files to import. */
+	private MetaDataDialog	metaDataChooser;
 
 	/** Flag indicating that the window has been marked to be closed.*/
 	private boolean 		markToclose;
+	
+	/** holds import information like group, project, importer, dataset**/
+	private ImportUserData importUserData;
+
+	private boolean metaDataCreated;
 	
 	/**
 	 * Posts event if required indicating the status of the import process.
@@ -201,6 +215,7 @@ class ImporterComponent
 		controller = new ImporterControl(this);
 		view = new ImporterUI();
 		markToclose = false;
+		metaDataCreated=false;
 	}
 
 	/** Links up the MVC triad. */
@@ -332,6 +347,19 @@ class ImporterComponent
             view.selectChooser();
         }
         chooser.setSelectedGroup(getSelectedGroup());
+        
+		//read out workstation name from config file
+        String microscopeName = (String) ImporterAgent.getRegistry().lookup(LookupNames.MICROSCOPE_WORKSTATION);
+        
+        //create instance of metadata editor (MetaDataDialog) and add it to the view
+        if(metaDataChooser==null){
+        	metaDataChooser = new MetaDataDialog(view,model.getSupportedFormats(),type, 
+        			controller.getAction(ImporterControl.CANCEL_BUTTON),this,
+        			chooser.getImportButton(),chooser.getCancelImportButton(), microscopeName); 
+        	metaDataChooser.addPropertyChangeListener(controller);
+        	view.addMDComponent(metaDataChooser);
+        }
+
         if (model.isMaster() || CollectionUtils.isEmpty(objects) || !reactivate)
             refreshContainers(new ImportLocationDetails(type));
         //load available disk space

@@ -88,6 +88,7 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  * @version 3.0
  * @since 3.0-Beta4
  */
+
 abstract class ImporterUIElement extends ClosableTabbedPaneComponent implements PropertyChangeListener {
 
     /** Description of the component. */
@@ -1088,4 +1089,4 @@ abstract class ImporterUIElement extends ClosableTabbedPaneComponent implements 
         }
     }
 
-}
+		}

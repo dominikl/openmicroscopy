@@ -80,6 +80,8 @@ import org.openmicroscopy.shoola.agents.fsimporter.IconManager;
 import org.openmicroscopy.shoola.agents.fsimporter.ImporterAgent;
 import org.openmicroscopy.shoola.agents.fsimporter.actions.GroupSelectionAction;
 import org.openmicroscopy.shoola.agents.fsimporter.chooser.ImportDialog;
+import org.openmicroscopy.shoola.agents.fsimporter.metaChooser.MetaDataDialog;
+import org.openmicroscopy.shoola.agents.fsimporter.metaChooser.util.MapAnnotationObject;
 import org.openmicroscopy.shoola.agents.fsimporter.util.FileImportComponentI;
 import org.openmicroscopy.shoola.agents.imviewer.view.ImViewer;
 import org.openmicroscopy.shoola.env.data.model.ImportableFile;
@@ -90,6 +92,7 @@ import org.openmicroscopy.shoola.util.ui.ClosableTabbedPane;
 import org.openmicroscopy.shoola.util.ui.ClosableTabbedPaneComponent;
 import org.openmicroscopy.shoola.util.ui.TitlePanel;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
+import org.slf4j.LoggerFactory;
 
 /** 
  * The {@link Importer}'s View. Displays the on-going import and the finished
@@ -107,6 +110,10 @@ import org.openmicroscopy.shoola.util.ui.UIUtilities;
  */
 class ImporterUI extends TopWindow
 {
+	
+	/** Logger for this class. */
+	private static final org.slf4j.Logger LOGGER =
+    	    LoggerFactory.getLogger(ImporterUI.class);
 
 	/** The text displayed in the header of the dialog.*/
 	private static final String TEXT_TITLE_DESCRIPTION =
@@ -130,6 +137,10 @@ class ImporterUI extends TopWindow
 	
 	/** Reference to the control. */
 	private ImporterControl	controller;
+	
+	private ImportDialog chooser;
+	
+	private MetaDataDialog metaData;
 	
 	/** The total of imports. */
 	private int total;
@@ -157,6 +168,8 @@ class ImporterUI extends TopWindow
     
     /** The debug text.*/
     private JTextPane	debugTextPane;
+
+	private TitlePanel titlePane;
     
 	/**
 	 * Creates the component hosting the debug text.
@@ -271,17 +284,17 @@ class ImporterUI extends TopWindow
 		container.setLayout(new BorderLayout(0, 0));
 		
 		IconManager icons = IconManager.getInstance();
-		TitlePanel tp = new TitlePanel(TEXT_TITLE, "", TEXT_TITLE_DESCRIPTION, 
+		titlePane = new TitlePanel(TEXT_TITLE, "", TEXT_TITLE_DESCRIPTION, 
 				icons.getIcon(IconManager.IMPORT_48));
 		JXPanel p = new JXPanel();
 		JXPanel lp = new JXPanel();
 		lp.setLayout(new FlowLayout(FlowLayout.LEFT));
 		lp.add(messageLabel);
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-		p.add(tp);
+		p.add(titlePane);
 		p.add(lp);
-		p.setBackgroundPainter(tp.getBackgroundPainter());
-		lp.setBackgroundPainter(tp.getBackgroundPainter());
+		p.setBackgroundPainter(titlePane.getBackgroundPainter());
+		lp.setBackgroundPainter(titlePane.getBackgroundPainter());
 		container.add(p, BorderLayout.NORTH);
 		container.add(tabs, BorderLayout.CENTER);
 		container.add(controlsBar, BorderLayout.SOUTH);
@@ -314,7 +327,7 @@ class ImporterUI extends TopWindow
 		tabs.addChangeListener(new ChangeListener() {
 			
 			public void stateChanged(ChangeEvent e) {
-				controlsBar.setVisible(tabs.getSelectedIndex() != 0);
+				controlsBar.setVisible(tabs.getSelectedIndex() != 0 && tabs.getSelectedIndex() !=1);
 				controller.getAction(
 						ImporterControl.RETRY_BUTTON).setEnabled(
 							hasFailuresToReupload());
@@ -422,6 +435,7 @@ class ImporterUI extends TopWindow
 	void addComponent(ImportDialog chooser)
 	{
 		if (chooser == null) return;
+		this.chooser=chooser;
 		tabs.insertTab("Select Data to Import", null, chooser, "", 0);
 		//if in debug mode insert the debug section
 		Boolean debugEnabled = (Boolean) 
@@ -440,6 +454,43 @@ class ImporterUI extends TopWindow
 		selectChooser();
 		pack();
 	}
+	
+	/** 
+	 * Adds the chooser to the tab.
+	 * 
+	 * @param chooser The component to add.
+	 */
+	void addMDComponent(MetaDataDialog metaData)
+	{
+		if (metaData == null) return;
+		this.metaData=metaData;
+		tabs.insertTab("Specify MetaData", null, metaData, "", 1);
+		//if in debug mode insert the debug section
+		Boolean debugEnabled = (Boolean) 
+			ImporterAgent.getRegistry().lookup("/options/Debug");
+		if (debugEnabled != null && debugEnabled.booleanValue()) {
+			IconManager icons = IconManager.getInstance();
+			ClosableTabbedPaneComponent c = new ClosableTabbedPaneComponent(1, 
+					"Debug Text", icons.getIcon(IconManager.DEBUG));
+			c.setCloseVisible(false);
+			c.setClosable(false);
+			double[][] tl = {{TableLayout.FILL}, {TableLayout.FILL}};
+			c.setLayout(new TableLayout(tl));
+			c.add(createDebugTab(), "0, 0");
+			tabs.insertClosableComponent(c);
+		}
+		String title=metaData.getMicName()+(metaData.getMicDesc()!=null?metaData.getMicDesc():"");
+		setNewTitle(title);
+		pack();
+	}
+	
+	/** refresh filetree of MetaDataEditor*/
+	public void refreshMetaFileView(List<ImportableFile> files){
+		metaData.refreshFileView(files,chooser.getFileFilter());
+	}
+	
+	/** Indicates to the select the metaData chooser. */
+	void selectMetaDataChooser() { tabs.setSelectedIndex(1); }
 	
 	/** Indicates to the select the import chooser. */
 	void selectChooser() { tabs.setSelectedIndex(0); }
@@ -525,7 +576,7 @@ class ImporterUI extends TopWindow
 	void reset()
 	{
 		int n = tabs.getTabCount();
-		for (int i = 1; i < n; i++) {
+		for (int i = 2; i < n; i++) {
 			tabs.remove(i);
 		}
 		uiElements.clear();
@@ -780,5 +831,42 @@ class ImporterUI extends TopWindow
 		packWindow();
 		UIUtilities.centerAndShow(this);
 	}
+
+	public void startImport() {
+		metaData.saveChanges("");
+		chooser.importFiles();
+	}
+
+	
+	public void setNewTitle(String micName)
+	{
+		titlePane.setTitle(TEXT_TITLE+": "+micName);
+	}
+
+	public void setMapAnnotation(MapAnnotationObject o)
+	{
+		if(o==null || (o!=null && o.getMapAnnotationList().isEmpty()))
+			LOGGER.info("Empty mapAnnotation");
+//		else{
+//			System.out.println("\t # ImporterUI::setMapAnnotation() for "+o.getFileName());
+//			o.printObject();
+//		}
+		chooser.setMapAnnotation(o.getFileName(), o);
+	}
+	
+	public void deleteMapAnnotations() {
+		chooser.deleteMapAnnotations();
+	}
+	
+	
+
+	
+
+	public void showMetaDataDialog() {
+		selectMetaDataChooser();
+		
+	}
+
+	
 
 }

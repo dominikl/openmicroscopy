@@ -323,7 +323,7 @@ public class ImporterAgent
     /** Registers the agent with the tool bar.*/
     private void register()
     {
-        String description = "Open the Importer.";
+        String description = "Open the UOS Importer.";
         TaskBar tb = registry.getTaskBar();
         IconManager icons = IconManager.getInstance();
         JButton b = new JButton(icons.getIcon(IconManager.IMPORT));

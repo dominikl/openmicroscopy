@@ -531,7 +531,13 @@ public class BasicACLVoter implements ACLVoter {
         for (int i = 0; i < scopes.length; i++) {
             Scope scope = scopes[i];
             if (scope == null) continue;
-
+            if (!sysType) {
+                if (c.getCurrentUserId() == roles.getGuestId()) {
+                    return 0;
+                }
+            } else if (sysType) {
+                // no privilege
+            } 
             boolean hasLightAdminPrivilege = false;
             if (!sysType) {
                 if (c.getCurrentUserId() == roles.getGuestId()) {

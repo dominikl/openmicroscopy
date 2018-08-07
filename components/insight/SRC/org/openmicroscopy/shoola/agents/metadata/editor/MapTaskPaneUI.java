@@ -91,7 +91,7 @@ public class MapTaskPaneUI extends AnnotationTaskPaneUI implements
 
     /** Reference to the {@link MapTable}s */
     private List<MapTable> mapTables = new ArrayList<MapTable>();
-
+    
     /** Flag to en/disable the ListSelectionListener */
     private boolean listenerActive = true;
 
@@ -408,7 +408,7 @@ public class MapTaskPaneUI extends AnnotationTaskPaneUI implements
         for (MapTable table : mapTables) {
             if (table.getData().getId() == data.getId())
                 return table;
-        }
+            }
 
         // the user's MapAnnotation might not have an ID yet.
         if (isUsers(data)) {
@@ -457,7 +457,7 @@ public class MapTaskPaneUI extends AnnotationTaskPaneUI implements
     private boolean isOther(MapAnnotationData data) {
         return !MapAnnotationData.NS_CLIENT_CREATED.equals(data.getNameSpace());
     }
-
+    
     /**
      * Creates a {@link MapTable} and adds it to the list of mapTables; Returns
      * <code>null</code> if the {@link MapAnnotationData} is empty and not
@@ -719,45 +719,45 @@ public class MapTaskPaneUI extends AnnotationTaskPaneUI implements
         }
 
         if (filter == Filter.SHOW_ALL || filter == Filter.ADDED_BY_OTHERS) {
-            list.addAll(model.getMapAnnotations(MapAnnotationType.OTHER_USERS));
+        	list.addAll(model.getMapAnnotations(MapAnnotationType.OTHER_USERS));
         }
 
         list.addAll(model.getMapAnnotations(MapAnnotationType.OTHER));
 
         for (MapAnnotationData ma : list) {
-            MapTable t = findTable(ma);
-            if (t != null) {
-                t.setData(ma);
-            } else {
-                // if there isn't a table yet, create it
-                String title = ma.getOwner() != null && !isUsers(ma) ? "Added by: "
-                        + EditorUtil.formatExperimenter(ma.getOwner())
-                        : "";
+        	MapTable t = findTable(ma);
+        	if (t != null) {
+        		t.setData(ma);
+        	} else {
+        		// if there isn't a table yet, create it
+        		String title = ma.getOwner() != null && !isUsers(ma) ? "Added by: "
+        				+ EditorUtil.formatExperimenter(ma.getOwner())
+        				: "";
 
-                JPanel p = new JPanel();
-                p.setBackground(UIUtilities.BACKGROUND_COLOR);
-                UIUtilities.setBoldTitledBorder(title, p);
-                p.setToolTipText(generateToolTip(ma));
-                p.setLayout(new BorderLayout());
-                t = createMapTable(ma);
+        				JPanel p = new JPanel();
+        				p.setBackground(UIUtilities.BACKGROUND_COLOR);
+        				UIUtilities.setBoldTitledBorder(title, p);
+        				p.setToolTipText(generateToolTip(ma));
+        				p.setLayout(new BorderLayout());
+        				t = createMapTable(ma);
 
-                if (t != null) {
-                    p.add(t, BorderLayout.CENTER);
+        				if (t != null) {
+        					p.add(t, BorderLayout.CENTER);
 
-                    // if the MapAnnotation has a custom namespace, display it
-                    if (!CommonsLangUtils.isEmpty(ma.getNameSpace())
-                            && !MapAnnotationData.NS_CLIENT_CREATED.matches(ma
-                                    .getNameSpace())) {
-                        JLabel ns = new JLabel(UIUtilities.formatPartialName(ma
-                                .getNameSpace()));
-                        ns.setFont(ns.getFont().deriveFont(Font.BOLD));
-                        p.add(ns, BorderLayout.NORTH);
-                    }
+        					// if the MapAnnotation has a custom namespace, display it
+        					if (!CommonsLangUtils.isEmpty(ma.getNameSpace())
+        							&& !MapAnnotationData.NS_CLIENT_CREATED.matches(ma
+        									.getNameSpace())) {
+        						JLabel ns = new JLabel(UIUtilities.formatPartialName(ma
+        								.getNameSpace()));
+        						ns.setFont(ns.getFont().deriveFont(Font.BOLD));
+        						p.add(ns, BorderLayout.NORTH);
+        					}
 
-                    tablePanel.add(p, c);
-                    c.gridy++;
-                }
-            }
+        					tablePanel.add(p, c);
+        					c.gridy++;
+        				}
+        	}
         }
 
         refreshButtonStates();
