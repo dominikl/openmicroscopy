@@ -33,11 +33,12 @@ import omero.gateway.model.DataObject;
 import omero.gateway.model.ImageData;
 import omero.gateway.model.PixelsData;
 import omero.log.LogMessage;
+
+import org.openmicroscopy.shoola.env.LookupNames;
 import org.openmicroscopy.shoola.env.data.OmeroImageService;
 import org.openmicroscopy.shoola.env.data.model.ThumbnailData;
 import org.openmicroscopy.shoola.env.data.views.BatchCall;
 import org.openmicroscopy.shoola.env.data.views.BatchCallTree;
-import org.openmicroscopy.shoola.util.VersionCompare;
 import org.openmicroscopy.shoola.util.image.geom.Factory;
 import org.openmicroscopy.shoola.util.image.io.WriterImage;
 
@@ -68,11 +69,6 @@ import java.util.HashSet;
  * @since OME2.2
  */
 public class ThumbnailLoader extends BatchCallTree {
-
-    /**
-     * Version of OMERO.server with {@code getThumbnailWithoutDefault}
-     */
-    private static final String VERSION_THUMBNAIL_NO_DEFAULT = "5.4.8";
 
     /**
      * The images for which we need thumbnails.
@@ -333,9 +329,10 @@ public class ThumbnailLoader extends BatchCallTree {
                 store.setRenderingDefId(rndDefId);
         }
 
-        if (VersionCompare.compare(context.getGateway().getServerVersion(), VERSION_THUMBNAIL_NO_DEFAULT) >= 0) {
+        if ((boolean) context.lookup(LookupNames.SERVER_5_4_8_OR_LATER)) {
             // If the client is connecting to a server with version 5.4.8 or greater, use the thumbnail
             // loading function that doesn't return a clock.
+            // TODO: Can be removed for >= 5.5.0 release
             return store.getThumbnailWithoutDefault(omero.rtypes.rint(sizeX),
                     omero.rtypes.rint(sizeY));
         } else {
