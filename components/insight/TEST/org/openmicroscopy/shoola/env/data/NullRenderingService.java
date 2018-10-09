@@ -352,7 +352,7 @@ public class NullRenderingService
 	{
 		return null;
 	}
-
+	
 	/**
      * No-op implementation
      * @see OmeroImageService#loadROIFromServer(long, long)

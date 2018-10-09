@@ -2,7 +2,7 @@
 <agent name="Importer">
    <resources>
      <iconFactories>
-	<!-- This entry is turned into an instance of: 
+	<!-- This entry is turned into an instance of:
        org.openmicroscopy.shoola.env.config.IconFactory
        This object can then be used to retrieve any image file within
        the directory pointed by the location tag. -->
@@ -14,7 +14,7 @@
 
      </iconFactories>
      <fonts>
-       <!-- This entry is turned into an instance of java.awt.Font. --> 
+       <!-- This entry is turned into an instance of java.awt.Font. -->
        <structuredEntry name="/resources/fonts/Titles" type="font">
          <family>SansSerif</family>
          <size>12</size>
@@ -39,5 +39,6 @@ into a dataset -->
 <entry name="/options/Debug" type="boolean">false</entry>
 <!-- limit the number of files to show detailed import information for -->
 <entry name="/options/DetailedImportFileLimit" type="integer">100</entry>
+<entry name="/services/ADMIN/microscope">Universal</entry>
 </options>
 </agent>

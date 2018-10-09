@@ -79,7 +79,10 @@ public class AnnotationTaskPane extends JXTaskPane {
         RATING("Ratings"),
 
         /** User comments */
-        COMMENTS("Comments");
+        COMMENTS("Comments"),
+    	
+    	/** UOS.importer data */
+    	METADATA_UOS("MetaData Import");
 
         /** Human readable name for this annotation type */
         String name = "";
@@ -224,6 +227,9 @@ public class AnnotationTaskPane extends JXTaskPane {
         case MAP:
             ui = new MapTaskPaneUI(model, view, controller);
             break;
+        case METADATA_UOS:
+        	ui = new MetaDataTaskPaneUI(model, view, controller);
+        	break;
         case ATTACHMENTS:
             ui = new AttachmentsTaskPaneUI(model, view, controller);
             break;

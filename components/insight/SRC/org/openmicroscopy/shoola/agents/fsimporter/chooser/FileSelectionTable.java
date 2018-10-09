@@ -618,7 +618,7 @@ class FileSelectionTable
 	    }
 	    model.onSelectionChanged();
 	}
-
+	
 	/**
 	 * Returns the size of the files to import.
 	 * 

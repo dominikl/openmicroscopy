@@ -41,12 +41,15 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import omero.gateway.SecurityContext;
+
+import org.openmicroscopy.shoola.agents.fsimporter.metaChooser.util.MapAnnotationObject;
 import org.openmicroscopy.shoola.util.CommonsLangUtils;
 import org.openmicroscopy.shoola.util.filter.file.TIFFFilter;
 import org.openmicroscopy.shoola.util.ui.UIUtilities;
 
 import omero.gateway.model.DataObject;
 import omero.gateway.model.DatasetData;
+import omero.gateway.model.MapAnnotationData;
 import omero.gateway.model.ProjectData;
 import omero.gateway.model.ScreenData;
 import omero.gateway.model.TagAnnotationData;
@@ -197,6 +200,9 @@ public class ImportableObject
 	/** The collection of tags. */
 	private Collection<TagAnnotationData> tags;
 	
+	/** The map annotation to each file for import*/
+	private Map<String,MapAnnotationObject> mapAnnots;
+	
 	/** The array containing pixels size.*/
 	private double[] pixelsSize;
 	
@@ -274,6 +280,7 @@ public class ImportableObject
 		loadThumbnail = true;
 		newObjects = new ArrayList<DataObject>();
 		projectDatasetMap = new HashMap<Long, List<DatasetData>>();
+		mapAnnots=new HashMap<String,MapAnnotationObject>();
 	}
 
     /**
@@ -336,7 +343,27 @@ public class ImportableObject
 	{
 		this.tags = tags;
 	}
-
+	
+	/**
+	 * Sets the mapAnnotation for given file
+	 * 
+	 * @param fileName
+	 * @param annot
+	 */	
+	public void setMapAnnotation(Map<String,MapAnnotationObject> maps)
+	{
+		this.mapAnnots=maps;
+	}
+	
+	public void printMapAnnotationList()
+	{
+		if(mapAnnots!=null){
+			System.out.println("MAP-ANNOTATION_LIST");
+			MapAnnotationObject.printMapAnnotations(mapAnnots);
+		}else
+			System.out.println("MAP-ANNOTATION_LIST : 0");
+	}
+	
 	/**
 	 * Sets the depth used scanning a folder.
 	 * 
@@ -464,6 +491,17 @@ public class ImportableObject
 	 * @return See above.
 	 */
 	public Collection<TagAnnotationData> getTags() { return tags; }
+	
+	public MapAnnotationObject getMapAnnotation(String fileName)
+	{
+		return mapAnnots.get(fileName);
+		
+	}
+	
+	public Map<String,MapAnnotationObject> getMap()
+	{
+		return mapAnnots;
+	}
 	
 	/**
 	 * Returns <code>true</code> if new tags were created, <code>false</code>

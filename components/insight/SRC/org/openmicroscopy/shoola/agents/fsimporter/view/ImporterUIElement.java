@@ -1099,5 +1099,4 @@ abstract class ImporterUIElement extends ClosableTabbedPaneComponent implements 
             }
         }
     }
-
 }
